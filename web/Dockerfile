@@ -9,16 +9,14 @@ COPY pnpm-lock.yaml ./pnpm-lock.yaml
 # Installer PNPM et dépendances
 RUN corepack enable && pnpm install
 
+# Copier uniquement les fichiers nécessaires pour le build
 COPY web/index.html ./index.html
 COPY web/public/ ./public/
 COPY web/src/ ./src/
-
-# Copier uniquement les fichiers nécessaires pour le build
-COPY web/index.html ./index.html
-COPY web/vite.config.* ./ 
-COPY web/tsconfig*.json ./
-COPY web/public ./public
-COPY web/src ./src
+COPY web/vite.config.ts ./vite.config.ts
+COPY web/tsconfig.json ./tsconfig.json
+COPY web/tsconfig.app.json ./tsconfig.app.json
+COPY web/tsconfig.node.json ./tsconfig.node.json
 
 # Copier le code React
 COPY web/package.json ./package.json
