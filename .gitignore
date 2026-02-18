@@ -1,0 +1,20 @@
+node_modules
+.pnpm-store
+.env
+.env.*
+dist
+build
+coverage
+
+# logs
+*.log
+
+# Docker
+*.pid
+
+# OS
+.DS_Store
+
+# IDE
+.vscode
+.idea
