@@ -112,6 +112,8 @@ docker compose up --build
 
 ## Déploiement
 Le projet est déployé via Render Blueprint.
+[Déploiement WEB](https://realtime-web.onrender.com/)
+[Déploiement API](https://realtime-api-nykk.onrender.com/health)
 
 ### Caractéristiques
 - 2 services indépendants
