@@ -33,7 +33,7 @@ FROM nginx:alpine AS production
 RUN rm -rf /etc/nginx/conf.d/default.conf
 
 # Copie config Nginx personnalisée
-COPY web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY web/nginx.conf /etc/nginx/templates/default.conf.template
 
 # Copier les fichiers build React
 COPY --from=builder /app/dist /usr/share/nginx/html
