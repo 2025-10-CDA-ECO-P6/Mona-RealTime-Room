@@ -1,34 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './styles/main.scss'
+import Button from './components/ui/button';
+import Navbar from './components/layout/Navbar';
+import imgHome from '../public/img-home.jpg';
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Navbar />
+      <header className="hero-header">
+        <h1>LE COWORKING SOCIAL EN MUSIQUE</h1>
+        <h2>MOINS D'ISOLEMENT, PLUS D'ELAN</h2>
+        <h3># MUSICBOX</h3>
+      </header>
+
+      <section className='cards'>
+        <div className='card__info'>
+          <h4>Accès musique</h4>
+          <h5>Rejoignez une room</h5>
+          <p>Entrez le nom de la room que vous souhaitez rejoindre ou créer une nouvelle room.</p>
+        </div>
+          <div className='card__img'>
+              <h6 className='card__img-label'>ROOMS LIVE - TEMPS REEL</h6>
+              <img className="imghome" src={imgHome} alt="Room Live" />
+          </div>
+      </section>
+                <Button>Continuer</Button>
     </>
+
   )
 }
 

@@ -1,0 +1,84 @@
+@use '@/styles/spacing' as *;
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: $space-5;
+  padding: $space-3 ;
+  border-radius: $radius-lg;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.85) 0%,
+    rgba(2, 6, 23, 0.9) 100%
+  );
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.nav__pro {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.nav__logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav__wave {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  position: absolute;
+  animation: pulse 2.2s infinite ease-out;
+}
+
+.nav__name {
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.08em;
+  font-size: 0.9rem;
+}
+
+.nav__menu {
+  display: flex;
+  gap: $space-5;
+}
+
+.nav__menu a {
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.nav__menu a:hover {
+  color: white;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}

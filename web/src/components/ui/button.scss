@@ -1,0 +1,17 @@
+@use '@/styles/spacing' as *;
+
+.btn {
+  padding:$space-2 $space-6;
+  border-radius: $space-5;
+
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: #e03910;
+  color: #ffffff;
+  transition: background 0.2s ease;
+}
+
+.btn:hover {
+  background: #ea580c;
+}

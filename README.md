@@ -120,3 +120,9 @@ Le projet est déployé via Render Blueprint.
 - health check API
 - reverse proxy Nginx
 - support WebSocket
+
+### SCSS 
+Pour build le css : 
+```bash 
+pnpm -F web build
+```
