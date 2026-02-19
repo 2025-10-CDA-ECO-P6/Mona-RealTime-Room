@@ -10,8 +10,6 @@ body {
     min-height: 100vh;
     margin: 0;
     display: flex;
-    flex-direction: column;
-
     background:
         radial-gradient(circle at 15% 20%, #c7d2fe 0%, transparent 40%),
         radial-gradient(circle at 85% 70%, #a5f3fc 0%, transparent 45%),
@@ -44,10 +42,10 @@ body {
     @include respond(lg) {
         flex-direction: row;
         gap: $space-6;
-        margin: $space-2 $space-8;
+        margin: $space-8 $space-8;
         padding: $space-0;
         border-radius: 120px;
-        height: 40%;
+        height: 50%;
     }
 }
 
