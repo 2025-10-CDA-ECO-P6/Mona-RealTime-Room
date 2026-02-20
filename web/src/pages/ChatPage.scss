@@ -2,7 +2,6 @@
 @use '../styles/typography';
 @use '../styles/colors';
 @use '@/styles/spacing' as *;
-@use '@/styles/breakpoints' as *;
 @use '@/styles/mixins' as *;
 
 body {
@@ -14,10 +13,189 @@ body {
         #f8fafc;
 }
 
-#root {
-    display: flex;
-    flex-direction: column;
-    background: transparent;
+.chat-page {
+    .chat-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: $space-4;
+        padding: $space-4 0;
+        margin: $space-0 $space-8;
+        margin: $space-0 $space-4;
 
+        @include respond(md) {
+            margin: $space-0 $space-6;
+        }
 
+        @include respond(lg) {
+            margin: $space-0 $space-8;
+        }
+    }
+
+    .panel {
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: $radius-xl;
+        padding: $space-4;
+        backdrop-filter: blur(8px);
+    }
+
+    .panel__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: $space-3;
+        margin-bottom: $space-3;
+
+        h4 {
+            margin: 0;
+            font-size: 1.125rem;
+            line-height: 1.2;
+        }
+
+        p {
+            margin: $space-1 0 0;
+            opacity: 0.8;
+            font-size: 0.875rem;
+        }
+    }
+
+    .yt-player {
+        border-radius: $radius-lg;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background: rgba(0, 0, 0, 0.08);
+        margin-bottom: $space-3;
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%;
+    }
+
+    .yt-placeholder {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: $space-4;
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .label {
+        display: inline-block;
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-bottom: $space-2;
+    }
+
+    .form-row {
+        margin-top: $space-3;
+    }
+
+    .input-row {
+        display: flex;
+        gap: $space-3;
+        align-items: center;
+    }
+
+    .input {
+        flex: 1;
+        padding: 0 $space-4;
+        border-radius: $radius-round;
+        border: 1px solid rgba(0, 0, 0, 0.10);
+        background: rgba(255, 255, 255, 0.9);
+        outline: none;
+    }
+
+    .btn {
+        padding: 0 $space-4;
+        border-radius: $radius-round;
+        border: 0;
+        cursor: pointer;
+    }
+
+    .btn--ghost {
+        background: rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        color: rgb(58, 56, 56);
+    }
+
+    .queue {
+        margin-top: $space-4;
+        padding: $space-3;
+        border-radius: $radius-lg;
+        background: rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+
+        p {
+            margin: $space-2 0 0;
+            opacity: 0.85;
+            font-size: 0.875rem;
+        }
+    }
+
+    .queue__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        h5 {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+    }
+
+    .badge {
+        display: inline-grid;
+        place-items: center;
+        min-width: 26px;
+        height: 22px;
+        padding: 0 $space-3;
+        border-radius: $radius-round;
+        background: rgba(0, 0, 0, 0.18);
+        color: white;
+        font-size: 0.75rem;
+    }
+
+    .chat-box {
+        border-radius: $radius-lg;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        background: rgba(255, 255, 255, 0.8);
+        min-height: 220px;
+        padding: $space-3;
+        margin-bottom: $space-3;
+        overflow: auto;
+    }
+
+    .chat-input {
+        margin-top: $space-2;
+    }
+
+    .users-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+            padding: $space-3 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+    }
+
+    @include respond(lg) {
+        .chat-layout {
+            grid-template-columns: 1.2fr 1fr;
+            align-items: start;
+        }
+
+        .panel--users {
+            grid-column: 1 / 2;
+        }
+    }
+}
+
+footer {
+    @include respond(md) {
+        margin-top: $space-8;
+    }
 }

@@ -128,7 +128,14 @@ pnpm -F web build
 ```
 
 ## Aperçu Intégration 
+### Homepage
 <div align="center">
   <img src="./docs/Homepage-Desktop.png" width="60%" alt="Homepage Desktop">
   <img src="./docs/Homepage-Mobile.png" width="14%" alt="Homepage Mobile">
+</div>
+
+### Chatpage 
+<div align="center">
+  <img src="./docs/Chatpage-Desktop.png" width="60%" alt="Chatpage Desktop">
+  <img src="./docs/Chatpage-Mobile.png" width="14%" alt="Chatpage Mobile">
 </div>

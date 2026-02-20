@@ -42,3 +42,16 @@ Corepack permet :
 - Multi - stage = plusieurs FROM --> chaque from = nouvelle image
 
 **Multi-stage = fabriquer avec plein d'outils et livrer sans les outils**
+
+### BEM 
+BEM = Block Element Modifier
+C’est une convention de nommage CSS pour :
+- rendre le code lisible  
+- éviter les conflits  
+- faciliter la maintenance  
+- travailler en équipe  
+
+Le principe repose sur trois éléments :
+- Block : composant indépendant de l’interface (ex : chat, card, navbar).  
+- Element : partie interne d’un block, dépendante de celui-ci (ex : chat__message, card__title).  
+- Modifier : variation d’un block ou d’un élément (ex : button--primary, chat__message--me).  
