@@ -24,7 +24,7 @@ function App() {
             <ButtonInfo>SANS COMPTE</ButtonInfo>
             <ButtonInfo>TEMPS REEL</ButtonInfo>
             <ButtonInfo>PLAYLIST PARTAGEE</ButtonInfo>
-            <ButtonInfo>INSTANTANEE</ButtonInfo>
+            <ButtonInfo>CONNEXION INSTANTANEE</ButtonInfo>
           </div>
         </div>
         <div className='card__img'>
@@ -36,9 +36,17 @@ function App() {
         </div>
       </section>
 
-      <section>
+      <section className='card_pseudo'>
+        <h3>ENTREE</h3>
+        <h2>Choisis ton pseudo pour continuer</h2>
+        <p>Pseudo</p>
+        <input
+          type="text"
+          name="pseudo"
+          id="pseudo-input"
+          placeholder="Ex : Aurora"
+        />
         <Button>Continuer</Button>
-
       </section>
 
 

@@ -2,9 +2,10 @@
 @use '@/styles/mixins' as *;
 
 .button_info {
+  display: flex;
   border-radius: $radius-xl;
   padding: $space-1 $space-6;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   cursor: pointer;
   border: 1px solid #9ca3af;
   font-weight: 500;
@@ -13,7 +14,7 @@
 
   @include respond(lg) {
     padding: $space-0 $space-4;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     border: 2px solid #9ca3af;
   }
 }
