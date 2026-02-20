@@ -1,13 +1,12 @@
 import './Button.scss';
 
-type ButtonProps = {
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   children: React.ReactNode;
-  disabled?: boolean;
 };
 
-export default function Button({ children, disabled = false }: ButtonProps) {
+export default function Button({ children, ...props }: ButtonProps) {
   return (
-    <button className="btn" disabled={disabled}>
+    <button className="btn" {...props}>
       {children}
     </button>
   );

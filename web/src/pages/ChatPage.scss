@@ -1,0 +1,23 @@
+@use '../styles/reset';
+@use '../styles/typography';
+@use '../styles/colors';
+@use '@/styles/spacing' as *;
+@use '@/styles/breakpoints' as *;
+@use '@/styles/mixins' as *;
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at 15% 20%, #c7d2fe 0%, transparent 40%),
+        radial-gradient(circle at 85% 70%, #a5f3fc 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, #dbeafe 0%, transparent 50%),
+        #f8fafc;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+
+
+}
