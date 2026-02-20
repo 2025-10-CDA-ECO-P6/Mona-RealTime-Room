@@ -7,7 +7,7 @@
 
 
 body {
-    min-height: 100vh;
+    height: 100%;
     margin: 0;
     display: flex;
     background:
@@ -58,17 +58,20 @@ body {
 
     @include respond(lg) {
         border-radius: 0 120px 120px 0;
+
     }
 }
 
 .imghome {
     width: 100%;
-    height: 220px;
+    height: 200px;
     object-fit: cover;
     display: block;
 
     @include respond(md) {
+        width: 80%; 
         height: 100px;
+        margin-left: auto;
     }
 
     @include respond(lg) {
@@ -82,6 +85,10 @@ body {
     position: absolute;
     top: $space-3;
     right: $space-3;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
     padding: $space-2 $space-3;
@@ -98,6 +105,31 @@ body {
     }
 }
 
+.live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+    animation: liveBlink 1.4s infinite;
+}
+
+@keyframes liveBlink {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.35;
+        transform: scale(1.2);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 .card__info {
     display: flex;
     flex-direction: column;
@@ -110,4 +142,9 @@ body {
         gap: $space-4;
         margin-top: $space-9;
     }
+}
+
+.buttons_infos{
+    display: flex;
+    gap: $space-2;
 }

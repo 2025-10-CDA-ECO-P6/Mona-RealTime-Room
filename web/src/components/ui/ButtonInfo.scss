@@ -1,0 +1,19 @@
+@use '@/styles/spacing' as *;
+@use '@/styles/mixins' as *;
+
+.button_info {
+  border-radius: $radius-xl;
+  padding: $space-1 $space-6;
+  font-size: 0.7rem;
+  cursor: pointer;
+  border: 1px solid #9ca3af;
+  font-weight: 500;
+  background: #bbbbbb;
+  color: #000000;
+
+  @include respond(lg) {
+    padding: $space-0 $space-4;
+    font-size: 0.8rem;
+    border: 2px solid #9ca3af;
+  }
+}
