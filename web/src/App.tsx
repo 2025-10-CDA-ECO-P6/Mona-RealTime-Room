@@ -1,7 +1,7 @@
 import './styles/main.scss'
 import Button from './components/ui/Button';
 import Navbar from './components/layout/Navbar';
-import imgHome from '../public/img-home.jpg';
+import imgHome from './assets/img-home.jpg';
 import ButtonInfo from './components/ui/ButtonInfo';
 
 function App() {

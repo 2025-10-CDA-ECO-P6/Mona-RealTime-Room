@@ -126,3 +126,9 @@ Pour build le css :
 ```bash 
 pnpm -F web build
 ```
+
+## Aperçu Intégration 
+<div align="center">
+  <img src="./docs/Homepage-Desktop.png" width="60%" alt="Homepage Desktop">
+  <img src="./docs/Homepage-Mobile.png" width="14%" alt="Homepage Mobile">
+</div>
