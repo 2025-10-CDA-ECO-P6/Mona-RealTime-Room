@@ -8,7 +8,7 @@ export default function Navbar() {
           <span className="nav__wave" />
           <span className="nav__wave nav__wave--small" />
         </div>
-        <span className="nav__name">Musicbox</span>
+        <span className="nav__name">Pierre Feuille Ciseaux</span>
       </div>
 
       <nav className="nav__menu">

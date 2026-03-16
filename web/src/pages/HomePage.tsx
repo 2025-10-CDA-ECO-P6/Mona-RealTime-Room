@@ -14,21 +14,31 @@ function HomePage() {
 
       <main className="page">
         <header className="hero-header">
-          <h1>LE COWORKING SOCIAL EN MUSIQUE</h1>
-          <h2>MOINS D'ISOLEMENT, PLUS D'ELAN</h2>
-          <h3># MUSICBOX</h3>
+          <h1>JEU: PIERRE — FEUILLE — CISEAUX</h1>
+          <h2>Prêt·e à défier d'autres joueurs en temps réel ?</h2>
+          <h3>Vise la victoire — #PFC</h3>
         </header>
 
         <section className="cards">
           <div className="card__info">
-            <h4>Accès musique</h4>
-            <h5>Rejoignez une room</h5>
-            <p>Entrez le nom de la room que vous souhaitez rejoindre ou créer une nouvelle room.</p>
+            <h4>Accès jeu</h4>
+            <h5>Rejoignez une partie</h5>
+            <p>Entrez le nom de la partie que vous souhaitez rejoindre ou créez-en une nouvelle.</p>
             <div className="buttons_infos">
-              <ButtonInfo>SANS COMPTE</ButtonInfo>
-              <ButtonInfo>TEMPS REEL</ButtonInfo>
-              <ButtonInfo>PLAYLIST PARTAGEE</ButtonInfo>
-              <ButtonInfo>CONNEXION INSTANTANEE</ButtonInfo>
+              <ButtonInfo>JOUER SANS COMPTE</ButtonInfo>
+              <ButtonInfo>TEMPS RÉEL</ButtonInfo>
+              <ButtonInfo>MULTIJOUEUR</ButtonInfo>
+              <ButtonInfo>CLASSEMENTS</ButtonInfo>
+            </div>
+
+            <div className="rules">
+              <h5>Règles du jeu</h5>
+              <ol>
+                <li>Pierre bat Ciseaux</li>
+                <li>Ciseaux bat Feuille</li>
+                <li>Feuille bat Pierre</li>
+              </ol>
+              <p>Chaque manche: choisissez un coup simultanément. Première personne à 3 manches gagne la partie.</p>
             </div>
           </div>
 
@@ -37,7 +47,7 @@ function HomePage() {
               <span className="live-dot" />
               ROOMS LIVE - TEMPS REEL
             </h6>
-            <img className="imghome" src={imgHome} alt="Room Live" />
+            <img className="imghome" src={imgHome} alt="Partie Live" />
           </div>
         </section>
 
@@ -56,7 +66,7 @@ function HomePage() {
       </main>
 
       <footer>
-        <p>© 2024 MusicBox - Tous droits réservés</p>
+        <p>© 2024 PFC - Tous droits réservés</p>
       </footer>
     </>
   )

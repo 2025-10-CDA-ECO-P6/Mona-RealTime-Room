@@ -152,6 +152,35 @@ main {
     gap: $space-2;
 }
 
+.rules {
+    margin-top: $space-4;
+    padding: $space-3;
+    background: linear-gradient(90deg, rgba(16,185,129,0.06) 0%, rgba(245,158,11,0.04) 50%, rgba(59,130,246,0.03) 100%);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: $radius-lg;
+
+    h5 {
+        margin: 0 0 $space-2 0;
+        font-size: 1rem;
+    }
+
+    ol {
+        margin: 0 0 $space-2 1rem;
+        padding-left: 1.15rem;
+
+        li {
+            margin-bottom: $space-1;
+            font-size: 0.95rem;
+        }
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+}
+
 .card_pseudo {
     position: relative;
     z-index: 20;
