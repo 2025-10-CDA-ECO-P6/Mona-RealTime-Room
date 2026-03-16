@@ -20,9 +20,19 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+const DEFAULT_ALLOWED_ORIGINS = [
+  "http://localhost:5173",
+  "https://socket-io-front.vercel.app",
+  "https://realtime-web.onrender.com",
+];
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim())
+  : DEFAULT_ALLOWED_ORIGINS;
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://socket-io-front.vercel.app"],
+    origin: allowedOrigins,
   })
 );
 
@@ -43,7 +53,7 @@ type ClientToServerEvents = {
 
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://socket-io-front.vercel.app"],
+    origin: allowedOrigins,
   },
 });
 
