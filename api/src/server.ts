@@ -35,9 +35,9 @@ type ServerToClientEvents = {
 };
 
 type ClientToServerEvents = {
-  "room:join": (roomId: string) => void;
-  "room:leave": (roomId: string) => void;
-  "room:message": (data: { room: string; message: string }) => void;
+  "room:join": (data: string | { roomId: string; author?: string }) => void;
+  "room:leave": (data: string | { roomId: string; author?: string }) => void;
+  "room:message": (data: { room: string; message: string; author?: string }) => void;
   "chat:message": (msg: string) => void;
 };
 
@@ -53,13 +53,15 @@ type ChatMessage = {
   time: string;
   date: string;
   timestamp: Date;
+  author?: string;
 };
 
-const formatMessage = (text: string): ChatMessage => {
+const formatMessage = (text: string, author?: string): ChatMessage => {
   const now = new Date();
 
   return {
     text,
+    author,
     time: now.toLocaleTimeString("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
@@ -79,27 +81,37 @@ app.get("/health", (_, res) => {
 io.on("connection", (socket: Socket<ClientToServerEvents, ServerToClientEvents>) => {
   console.log("Connected:", socket.id);
 
-  socket.on("room:join", (roomId) => {
-    socket.join(roomId);
+  socket.on("room:join", (data) => {
+    const roomId = typeof data === 'string' ? data : data.roomId
+    const author = typeof data === 'object' && data && 'author' in data ? data.author : undefined
+
+    socket.join(roomId)
+
+    const text = author ? `${author} vient de rejoindre la partie` : `Un utilisateur a rejoint la room`
 
     io.to(roomId).emit(
       "room:message",
-      formatMessage(`Un utilisateur a rejoint la room`)
-    );
-  });
+      formatMessage(text, 'Système')
+    )
+  })
 
-  socket.on("room:leave", (roomId) => {
-    socket.leave(roomId);
+  socket.on("room:leave", (data) => {
+    const roomId = typeof data === 'string' ? data : data.roomId
+    const author = typeof data === 'object' && data && 'author' in data ? data.author : undefined
+
+    socket.leave(roomId)
+
+    const text = author ? `${author} a quitté la partie` : `Un utilisateur a quitté la room`
 
     io.to(roomId).emit(
       "room:message",
-      formatMessage(`Un utilisateur a quitté la room`)
-    );
-  });
+      formatMessage(text, 'Système')
+    )
+  })
 
 
-  socket.on("room:message", ({ room, message }) => {
-    io.to(room).emit("room:message", formatMessage(message));
+  socket.on("room:message", ({ room, message, author }) => {
+    io.to(room).emit("room:message", formatMessage(message, author));
   });
 
   // socket.on("chat:message", (msg) => {

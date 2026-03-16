@@ -1,7 +1,47 @@
 import './ChatPage.scss'
 import Navbar from '../components/layout/Navbar'
+import { useEffect, useState } from 'react'
+import socket from '../lib/socket'
+
+type ChatMessage = {
+  text: string
+  time: string
+  date?: string
+  author?: string
+}
 
 function ChatPage() {
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [input, setInput] = useState('')
+  const [pseudo] = useState(() => {
+    return localStorage.getItem('pseudo') ?? ''
+  })
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('socket connected', socket.id)
+    })
+
+    const roomId = 'global'
+    socket.emit('room:join', { roomId, author: pseudo })
+
+    socket.on('room:message', (msg: ChatMessage) => {
+      setMessages((prev) => [...prev, msg])
+    })
+
+    return () => {
+      socket.emit('room:leave', { roomId, author: pseudo })
+      socket.off('room:message')
+      socket.off('connect')
+    }
+  }, [])
+
+  const handleSend = () => {
+    if (!input.trim()) return
+    socket.emit('room:message', { room: 'global', message: input, author: pseudo })
+    setInput('')
+  }
+
   return (
     <>
       <Navbar />
@@ -20,6 +60,7 @@ function ChatPage() {
                 <h4>Table de jeu</h4>
                 <p>Choisis ton coup et lance la partie.</p>
               </div>
+              
               <button className="btn btn--ghost" type="button">
                 JOUER
               </button>
@@ -46,6 +87,23 @@ function ChatPage() {
             </div>
 
             <div className="chat-box">
+              {messages.length === 0 && <p className="muted">Aucun message</p>}
+              {messages.map((m, i) => (
+                <div key={i} className={`chat-message ${m.author === 'Système' ? 'chat-message--system' : ''}`}>
+                  <div className="chat-message__time"><strong>{m.time}</strong></div>
+                  <div className="chat-message__body">
+                    {m.author === 'Système' ? (
+                      <div className="chat-message__system">{m.text}</div>
+                    ) : (
+                      <>
+                        <span className="chat-message__author">{m.author ?? 'Anonyme'}</span>
+                        <span className="chat-message__sep">: </span>
+                        <span className="chat-message__text">{m.text}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="chat-input">
@@ -56,8 +114,13 @@ function ChatPage() {
                   className="input"
                   type="text"
                   placeholder="Ton message..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSend()
+                  }}
                 />
-                <button className="btn" type="button">Envoyer</button>
+                <button className="btn" type="button" onClick={handleSend}>Envoyer</button>
               </div>
             </div>
           </section>

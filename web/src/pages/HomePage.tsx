@@ -3,10 +3,14 @@ import Navbar from '../components/layout/Navbar'
 import imgHome from '../assets/img-home.jpg'
 import ButtonInfo from '../components/ui/ButtonInfo'
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import '../styles/main.scss'
 
 function HomePage() {
   const navigate = useNavigate()
+  const [pseudo, setPseudo] = useState(() => {
+    return localStorage.getItem('pseudo') ?? ''
+  })
 
   return (
     <>
@@ -60,8 +64,18 @@ function HomePage() {
             name="pseudo"
             id="pseudo-input"
             placeholder="Ex : Aurora"
+            value={pseudo}
+            onChange={(e) => setPseudo(e.target.value)}
           />
-          <Button onClick={() => navigate('/chat')}>Continuer</Button>
+          <Button
+            onClick={() => {
+              if (!pseudo.trim()) return
+              localStorage.setItem('pseudo', pseudo.trim())
+              navigate('/chat')
+            }}
+          >
+            Continuer
+          </Button>
         </section>
       </main>
 

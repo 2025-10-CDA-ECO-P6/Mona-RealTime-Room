@@ -284,6 +284,53 @@ body {
         overflow: auto;
     }
 
+    .chat-message {
+        display: flex;
+        gap: $space-3;
+        align-items: center;
+        padding: $space-2 0;
+        border-bottom: 1px dashed rgba(0,0,0,0.04);
+
+        &--system {
+            background: transparent;
+        }
+
+        .chat-message__time {
+            width: 64px;
+            flex-shrink: 0;
+            font-weight: 700;
+            color: rgba(0,0,0,0.6);
+            font-size: 0.85rem;
+        }
+
+        .chat-message__body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: $space-2;
+            flex-wrap: wrap;
+        }
+
+        .chat-message__author {
+            font-weight: 700;
+            margin-right: 4px;
+        }
+
+        .chat-message__sep {
+            margin-right: 6px;
+            color: rgba(0,0,0,0.5);
+        }
+
+        .chat-message__text {
+            color: rgba(0,0,0,0.85);
+        }
+
+        .chat-message__system {
+            font-style: italic;
+            color: rgba(0,0,0,0.7);
+        }
+    }
+
     .chat-input {
         margin-top: $space-2;
     }
