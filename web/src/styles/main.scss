@@ -233,7 +233,83 @@ main {
         font-style: italic;
     }
 }
+.rooms-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-3;
+  margin-top: $space-2;
+  margin-bottom: $space-4;
 
+  @include respond(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.room-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+
+  width: 100%;
+  padding: $space-4;
+  border-radius: $radius-lg;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: rgba(239, 68, 68, 0.35);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &--active {
+    border: 2px solid rgba(239, 68, 68, 0.55);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  &__meta {
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  &__status {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  &--empty .room-card__status {
+    color: #2563eb;
+  }
+
+  &--waiting .room-card__status {
+    color: #d97706;
+  }
+
+  &--full .room-card__status {
+    color: #dc2626;
+  }
+}
+
+.room-error {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: $space-2;
+}
 input {
     width: 90%;
     padding: $space-2;

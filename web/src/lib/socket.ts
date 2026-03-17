@@ -1,7 +1,12 @@
-import { io } from 'socket.io-client';
+import { io } from 'socket.io-client'
 
-const URL = import.meta.env.VITE_API_URL ?? 'https://realtime-api-nykk.onrender.com';
+const URL =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : 'https://realtime-api-nykk.onrender.com'
 
-const socket = URL ? io(URL) : io();
+const socket = io(URL, {
+  transports: ['websocket', 'polling'],
+})
 
-export default socket;
+export default socket

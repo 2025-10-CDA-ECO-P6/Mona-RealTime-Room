@@ -17,6 +17,23 @@ Réaliser une application web React + Express + Socket.IO permettant de rejoindr
 
 Ces choix sont assumés dans le cadre d’une V1.
 
+## Jeux
+### Règles du jeu 
+Chaque joueur choisit un coup parmi :  
+- pierre
+- feuille
+- ciseaux
+
+Les règles sont les suivantes : 
+- pierre bat ciseaux
+- ciseaux battent feuille
+- feuille bat pierre
+- si les deux coups sont identiques → égalité
+
+Optionnel :
+- le gagnant d’un round marque 1 point
+- la partie peut se jouer en plusieurs manches
+
 ## Monorepo PNPM
 Ce projet utilise PNPM afin de :
 - mutualiser les dépendances
@@ -187,3 +204,20 @@ Pour tester :
 ``` bash
 for i in {1..200}; do curl http://localhost:3000/health; done
 ```
+
+## Tests
+## Lancer les tests 
+Les tests sont écrits avec Vitest et couvrent la logique métier.
+
+Pour lancer tous les tests :
+``` bash
+cd api/  
+pnpm vitest
+```
+
+## Démarche TDD
+Le projet suit une approche Test Driven Development (TDD) :  
+- écriture d’un test décrivant un comportement attendu
+- exécution du test (échec)
+- implémentation minimale pour le faire passer
+- refactor du code

@@ -1,6 +1,7 @@
 import './ChatPage.scss'
 import Navbar from '../components/layout/Navbar'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import socket from '../lib/socket'
 
 type ChatMessage = {
@@ -11,34 +12,68 @@ type ChatMessage = {
 }
 
 function ChatPage() {
+  const navigate = useNavigate()
+
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
+  const [roomError, setRoomError] = useState<string | null>(null)
+
   const [pseudo] = useState(() => {
     return localStorage.getItem('pseudo') ?? ''
   })
 
+  const [roomId] = useState(() => {
+    return localStorage.getItem('roomId') ?? ''
+  })
+
   useEffect(() => {
-    socket.on('connect', () => {
+    if (!pseudo || !roomId) {
+      navigate('/')
+      return
+    }
+
+    const handleConnect = () => {
       console.log('socket connected', socket.id)
-    })
+    }
 
-    const roomId = 'global'
-    socket.emit('room:join', { roomId, author: pseudo })
-
-    socket.on('room:message', (msg: ChatMessage) => {
+    const handleRoomMessage = (msg: ChatMessage) => {
       setMessages((prev) => [...prev, msg])
-    })
+    }
+
+    const handleRoomError = (data: { message: string }) => {
+      setRoomError(data.message)
+    }
+
+    const handleRoomJoined = (data: { roomId: string }) => {
+      console.log('room joined:', data.roomId)
+      setRoomError(null)
+    }
+
+    socket.on('connect', handleConnect)
+    socket.on('room:message', handleRoomMessage)
+    socket.on('room:error', handleRoomError)
+    socket.on('room:joined', handleRoomJoined)
+
+    socket.emit('room:join', { roomId, author: pseudo })
 
     return () => {
       socket.emit('room:leave', { roomId, author: pseudo })
-      socket.off('room:message')
-      socket.off('connect')
+      socket.off('connect', handleConnect)
+      socket.off('room:message', handleRoomMessage)
+      socket.off('room:error', handleRoomError)
+      socket.off('room:joined', handleRoomJoined)
     }
-  }, [])
+  }, [navigate, pseudo, roomId])
 
   const handleSend = () => {
-    if (!input.trim()) return
-    socket.emit('room:message', { room: 'global', message: input, author: pseudo })
+    if (!input.trim() || !roomId) return
+
+    socket.emit('room:message', {
+      room: roomId,
+      message: input,
+      author: pseudo,
+    })
+
     setInput('')
   }
 
@@ -51,6 +86,7 @@ function ChatPage() {
           <h1>JEU: PIERRE — FEUILLE — CISEAUX</h1>
           <h2>Affronte un adversaire en temps réel</h2>
           <h3># PFC</h3>
+          <p className="chat-room-name">Room : {roomId}</p>
         </header>
 
         <section className="chat-layout">
@@ -60,7 +96,7 @@ function ChatPage() {
                 <h4>Table de jeu</h4>
                 <p>Choisis ton coup et lance la partie.</p>
               </div>
-              
+
               <button className="btn btn--ghost" type="button">
                 JOUER
               </button>
@@ -86,11 +122,18 @@ function ChatPage() {
               </div>
             </div>
 
+            {roomError && <p className="room-error">{roomError}</p>}
+
             <div className="chat-box">
               {messages.length === 0 && <p className="muted">Aucun message</p>}
               {messages.map((m, i) => (
-                <div key={i} className={`chat-message ${m.author === 'Système' ? 'chat-message--system' : ''}`}>
-                  <div className="chat-message__time"><strong>{m.time}</strong></div>
+                <div
+                  key={i}
+                  className={`chat-message ${m.author === 'Système' ? 'chat-message--system' : ''}`}
+                >
+                  <div className="chat-message__time">
+                    <strong>{m.time}</strong>
+                  </div>
                   <div className="chat-message__body">
                     {m.author === 'Système' ? (
                       <div className="chat-message__system">{m.text}</div>
@@ -120,13 +163,15 @@ function ChatPage() {
                     if (e.key === 'Enter') handleSend()
                   }}
                 />
-                <button className="btn" type="button" onClick={handleSend}>Envoyer</button>
+                <button className="btn" type="button" onClick={handleSend}>
+                  Envoyer
+                </button>
               </div>
             </div>
           </section>
         </section>
       </main>
-      
+
       <footer>
         <p>© 2024 PFC - Tous droits réservés</p>
       </footer>
