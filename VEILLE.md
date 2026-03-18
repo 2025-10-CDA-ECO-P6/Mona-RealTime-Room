@@ -55,3 +55,31 @@ Le principe repose sur trois éléments :
 - Block : composant indépendant de l’interface (ex : chat, card, navbar).  
 - Element : partie interne d’un block, dépendante de celui-ci (ex : chat__message, card__title).  
 - Modifier : variation d’un block ou d’un élément (ex : button--primary, chat__message--me).  
+
+### WebSocket
+Communication bidirectionnelle avec connexion persistante entre client et serveur.
+
+- HTTP : requête → réponse → terminé  
+- WebSocket : connexion ouverte → échanges continus  
+- Upgrade initial via HTTP
+- ws:// → WebSocket non sécurisé - wss:// → WebSocket sécurisé (chiffré TLS) 
+- Header spécifique coté serveur : Upgrade: websocket et Connection: Upgrade
+---
+
+### Socket.IO
+
+1. Event-driven  
+- emit(event, data) → envoyer un événement  
+- on(event, callback) → écouter un événement  
+
+2. Broadcast / ciblage  
+- io.emit() → tous les clients  
+- socket.emit() → uniquement ce client  
+- socket.to(room).emit() → tous dans la room sauf l’émetteur  
+- io.to(room).emit() → tous dans la room
+
+3. Gestion des connexions  
+- ouverture (onopen)
+- message (onmessage)
+- fermeture (onclose)
+- erreur (onerror)
