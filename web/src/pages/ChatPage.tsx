@@ -45,12 +45,25 @@ type PublicGameState = {
   }
 }
 
+const CHOICE_LABELS: Record<PlayerChoice, string> = {
+  pierre: 'Pierre',
+  feuille: 'Feuille',
+  ciseaux: 'Ciseaux',
+}
+
+const CHOICE_EMOJIS: Record<PlayerChoice, string> = {
+  pierre: '✊',
+  feuille: '✋',
+  ciseaux: '✌️',
+}
+
 function ChatPage() {
   const navigate = useNavigate()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [roomError, setRoomError] = useState<string | null>(null)
+  const [redirectCountdown, setRedirectCountdown] = useState(6)
 
   const [pseudo] = useState(() => localStorage.getItem('pseudo') ?? '')
   const [roomId] = useState(() => localStorage.getItem('roomId') ?? '')
@@ -91,6 +104,7 @@ function ChatPage() {
       setGameState(data)
       setSelectedChoice(null)
       setRoomError(null)
+      setRedirectCountdown(6)
     }
 
     const handleRoundStarted = (data: PublicGameState) => {
@@ -149,10 +163,27 @@ function ChatPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(Date.now())
-    }, 1000)
+    }, 250)
 
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    const isFinished = gameState?.game?.status === 'finished'
+    if (!isFinished) return
+
+    if (redirectCountdown <= 0) {
+      localStorage.removeItem('roomId')
+      navigate('/')
+      return
+    }
+
+    const timeout = setTimeout(() => {
+      setRedirectCountdown((prev) => prev - 1)
+    }, 1000)
+
+    return () => clearTimeout(timeout)
+  }, [gameState?.game?.status, redirectCountdown, navigate])
 
   const handleSend = () => {
     if (!input.trim() || !roomId) return
@@ -178,6 +209,11 @@ function ChatPage() {
       roomId,
       choice,
     })
+  }
+
+  const handleBackHome = () => {
+    localStorage.removeItem('roomId')
+    navigate('/')
   }
 
   const game = gameState?.game ?? null
@@ -208,9 +244,7 @@ function ChatPage() {
       return ''
     }
 
-    if (currentRound.winner === 'egalite') {
-      return 'Égalité sur cette manche.'
-    }
+    if (currentRound.winner === 'egalite') return 'Égalité sur cette manche.'
 
     return currentRound.winner === role
       ? 'Tu as gagné cette manche.'
@@ -230,13 +264,16 @@ function ChatPage() {
     return Math.max(0, Math.ceil((currentRound.deadlineAt - now) / 1000))
   }, [currentRound, now])
 
-  const gameStatusLabel = useMemo(() => {
-    if (!game) return 'En attente'
-    if (game.status === 'finished') return 'Terminée'
-    return 'En cours'
-  }, [game])
+  const roundProgress = useMemo(() => {
+    if (!game || !currentRound || currentRound.status !== 'waiting_for_choices') return 0
 
-  const myPlayerName = role === 'player1' ? player1Name : role === 'player2' ? player2Name : pseudo
+    const remaining = Math.max(0, currentRound.deadlineAt - now)
+    return Math.max(0, Math.min(100, (remaining / game.roundDurationMs) * 100))
+  }, [game, currentRound, now])
+
+  const myPlayerName =
+    role === 'player1' ? player1Name : role === 'player2' ? player2Name : pseudo
+
   const opponentName = role === 'player1' ? player2Name : player1Name
 
   const myScore =
@@ -255,6 +292,34 @@ function ChatPage() {
 
   const waitingForOpponent =
     !gameState?.players.player1.socketId || !gameState?.players.player2.socketId
+
+  const displayedMyChoice = myChoice
+    ? `${CHOICE_EMOJIS[myChoice]} ${CHOICE_LABELS[myChoice]}`
+    : 'Choix en attente'
+
+  const displayedOpponentChoice =
+    currentRound?.status === 'resolved'
+      ? opponentChoice
+        ? `${CHOICE_EMOJIS[opponentChoice]} ${CHOICE_LABELS[opponentChoice]}`
+        : 'Aucun choix'
+      : opponentChoice
+        ? 'Choix reçu'
+        : 'En attente'
+
+  const iWonRound = currentRound?.status === 'resolved' && currentRound.winner === role
+  const iLostRound =
+    currentRound?.status === 'resolved' &&
+    currentRound.winner !== 'egalite' &&
+    currentRound.winner !== role
+
+  const opponentWonRound =
+    currentRound?.status === 'resolved' &&
+    currentRound.winner !== 'egalite' &&
+    currentRound.winner !== role
+
+  const opponentLostRound = currentRound?.status === 'resolved' && currentRound.winner === role
+
+  const iWonGame = game?.status === 'finished' && game.winner === role
 
   return (
     <>
@@ -282,11 +347,6 @@ function ChatPage() {
               <span className="session-chip__label">Rôle</span>
               <strong>{role ?? 'en attente'}</strong>
             </div>
-
-            <div className="session-chip">
-              <span className="session-chip__label">Partie</span>
-              <strong>{gameStatusLabel}</strong>
-            </div>
           </div>
         </section>
 
@@ -295,7 +355,7 @@ function ChatPage() {
             <div className="panel__head panel__head--stack">
               <div>
                 <h4>Table de jeu</h4>
-                <p>État synchronisé avec le serveur.</p>
+                <p>Choisis rapidement avant la fin du temps.</p>
               </div>
             </div>
 
@@ -310,23 +370,22 @@ function ChatPage() {
                 <strong>{game?.minimumRounds ?? '-'}</strong>
               </div>
 
-              <div className="game-top-info__item">
-                <span>Statut</span>
-                <strong>{game?.status ?? 'en attente'}</strong>
-              </div>
-
-              <div className="game-top-info__item">
-                <span>Manche</span>
-                <strong>{currentRound?.status ?? 'aucune'}</strong>
-              </div>
-
-              <div className="game-top-info__item">
+              <div className="game-top-info__item game-top-info__item--timer">
                 <span>Temps</span>
-                <strong>
-                  {game && currentRound?.status === 'waiting_for_choices' && roundTimeLeft !== null
-                    ? `${roundTimeLeft}s`
-                    : '-'}
-                </strong>
+
+                {game && currentRound?.status === 'waiting_for_choices' && roundTimeLeft !== null ? (
+                  <>
+                    <strong>{roundTimeLeft}s</strong>
+                    <div className="timer-bar">
+                      <div
+                        className={`timer-bar__fill ${roundTimeLeft <= 5 ? 'timer-bar__fill--danger' : ''}`}
+                        style={{ width: `${roundProgress}%` }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <strong>-</strong>
+                )}
               </div>
             </div>
 
@@ -339,7 +398,7 @@ function ChatPage() {
 
               {!waitingForOpponent && game && currentRound?.status === 'waiting_for_choices' && roundTimeLeft !== null && (
                 <div className="game-status-strip__countdown">
-                  <span>Temps restant</span>
+                  <span>À toi de jouer</span>
                   <strong>{roundTimeLeft}s</strong>
                 </div>
               )}
@@ -355,7 +414,11 @@ function ChatPage() {
             </div>
 
             <div className="game-play">
-              <div className="player-panel player-panel--me">
+              <div
+                className={`player-panel player-panel--me ${
+                  iWonRound ? 'player-panel--winner' : ''
+                } ${iLostRound ? 'player-panel--loser' : ''}`}
+              >
                 <div className="player-info">
                   <div>
                     <strong>{myPlayerName || 'Toi'}</strong>
@@ -365,44 +428,51 @@ function ChatPage() {
                 </div>
 
                 <div className="player-img player-img--choice">
-                  <span className="player-img__label">Choix actuel</span>
-                  <strong>{myChoice ?? 'Pas encore joué'}</strong>
+                  <span className="player-img__label">Ton choix</span>
+                  <strong>{displayedMyChoice}</strong>
                 </div>
 
-                <div className="choice-grid">
+                <div className="choice-grid choice-grid--inline">
                   <button
-                    className={`choice-tile ${selectedChoice === 'pierre' ? 'choice-tile--active' : ''}`}
+                    className={`choice-tile choice-tile--rock ${selectedChoice === 'pierre' ? 'choice-tile--active' : ''}`}
                     type="button"
                     onClick={() => handlePlayChoice('pierre')}
                     disabled={!canPlay}
                   >
+                    <span className="choice-tile__visual choice-tile__visual--rock">✊</span>
                     <span className="choice-tile__title">Pierre</span>
-                    <span className="choice-tile__desc">Solide et directe</span>
+                    <span className="choice-tile__desc">Bloque</span>
                   </button>
 
                   <button
-                    className={`choice-tile ${selectedChoice === 'feuille' ? 'choice-tile--active' : ''}`}
+                    className={`choice-tile choice-tile--paper ${selectedChoice === 'feuille' ? 'choice-tile--active' : ''}`}
                     type="button"
                     onClick={() => handlePlayChoice('feuille')}
                     disabled={!canPlay}
                   >
+                    <span className="choice-tile__visual choice-tile__visual--paper">✋</span>
                     <span className="choice-tile__title">Feuille</span>
-                    <span className="choice-tile__desc">Couvre la pierre</span>
+                    <span className="choice-tile__desc">Recouvre</span>
                   </button>
 
                   <button
-                    className={`choice-tile ${selectedChoice === 'ciseaux' ? 'choice-tile--active' : ''}`}
+                    className={`choice-tile choice-tile--scissors ${selectedChoice === 'ciseaux' ? 'choice-tile--active' : ''}`}
                     type="button"
                     onClick={() => handlePlayChoice('ciseaux')}
                     disabled={!canPlay}
                   >
+                    <span className="choice-tile__visual choice-tile__visual--scissors">✌️</span>
                     <span className="choice-tile__title">Ciseaux</span>
-                    <span className="choice-tile__desc">Tranche la feuille</span>
+                    <span className="choice-tile__desc">Découpent</span>
                   </button>
                 </div>
               </div>
 
-              <div className="opponent-panel">
+              <div
+                className={`opponent-panel ${
+                  opponentWonRound ? 'player-panel--winner' : ''
+                } ${opponentLostRound ? 'player-panel--loser' : ''}`}
+              >
                 <div className="opponent-info">
                   <div>
                     <strong>{opponentName || 'Adversaire'}</strong>
@@ -413,13 +483,7 @@ function ChatPage() {
 
                 <div className="opponent-img opponent-img--choice">
                   <span className="player-img__label">Choix adverse</span>
-                  <strong>
-                    {currentRound?.status === 'resolved'
-                      ? opponentChoice ?? 'Aucun choix'
-                      : opponentChoice
-                        ? 'Choix reçu'
-                        : 'En attente'}
-                  </strong>
+                  <strong>{displayedOpponentChoice}</strong>
                 </div>
               </div>
             </div>
@@ -485,6 +549,23 @@ function ChatPage() {
             </div>
           </section>
         </section>
+
+        {game?.status === 'finished' && (
+          <div className="endgame-overlay">
+            <div className={`endgame-card ${iWonGame ? 'endgame-card--win' : 'endgame-card--lose'}`}>
+              <p className="endgame-card__eyebrow">Fin de partie</p>
+              <h2>{iWonGame ? 'Victoire' : 'Défaite'}</h2>
+              <p className="endgame-card__text">{gameResult}</p>
+              <p className="endgame-card__text">
+                Retour à l’accueil dans <strong>{redirectCountdown}</strong>s
+              </p>
+
+              <button className="endgame-card__button" type="button" onClick={handleBackHome}>
+                Retourner à l’accueil
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       <footer>
@@ -494,4 +575,4 @@ function ChatPage() {
   )
 }
 
-export default ChatPage;
+export default ChatPage
