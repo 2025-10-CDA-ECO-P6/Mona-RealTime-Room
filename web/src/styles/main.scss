@@ -12,7 +12,6 @@ body {
 #root {
     display: flex;
     flex-direction: column;
-    background: transparent;
     background:
         radial-gradient(circle at 15% 20%, #c7d2fe 0%, transparent 40%),
         radial-gradient(circle at 85% 70%, #a5f3fc 0%, transparent 45%),
@@ -25,7 +24,6 @@ main {
         margin-bottom: -50px;
     }
 }
-
 
 .hero-header {
     display: flex;
@@ -58,7 +56,6 @@ main {
         padding: $space-0;
         border-radius: 120px;
     }
-
 }
 
 .card__img {
@@ -67,18 +64,11 @@ main {
     overflow: hidden;
     z-index: 1;
     border-radius: $radius-xl;
-
-    @include respond(md) {
-        border-radius: 0 120px 120px 0;
-    }
-}
-
-.card__img {
     width: 100%;
-    z-index: 5;
 
     @include respond(md) {
         width: 110%;
+        border-radius: 0 120px 120px 0;
     }
 }
 
@@ -89,7 +79,6 @@ main {
     display: inline-flex;
     align-items: center;
     gap: $space-2;
-
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
     padding: $space-2 $space-3;
@@ -137,7 +126,6 @@ main {
     gap: $space-2;
     padding: $space-4;
 
-
     @include respond(md) {
         padding: $space-6;
         gap: $space-4;
@@ -155,8 +143,13 @@ main {
 .rules {
     margin-top: $space-4;
     padding: $space-3;
-    background: linear-gradient(90deg, rgba(16,185,129,0.06) 0%, rgba(245,158,11,0.04) 50%, rgba(59,130,246,0.03) 100%);
-    border: 1px solid rgba(16,185,129,0.12);
+    background: linear-gradient(
+        90deg,
+        rgba(16, 185, 129, 0.06) 0%,
+        rgba(245, 158, 11, 0.04) 50%,
+        rgba(59, 130, 246, 0.03) 100%
+    );
+    border: 1px solid rgba(16, 185, 129, 0.12);
     border-radius: $radius-lg;
 
     h5 {
@@ -184,18 +177,16 @@ main {
 .card_pseudo {
     position: relative;
     z-index: 20;
-
     display: flex;
     flex-direction: column;
     gap: $space-4;
-
     background-color: white;
     border-radius: $radius-xl;
     margin: $space-4;
     padding: $space-4;
 
     @include respond(md) {
-        max-width: 380px;
+        max-width: 420px;
         top: 100px;
         margin: $space-12;
         padding: $space-6 $space-8;
@@ -208,23 +199,20 @@ main {
         -webkit-backdrop-filter: blur(14px);
         border: 2px solid rgba(239, 68, 68, 0.25);
         margin-bottom: -100px;
-        gap: $space-1;
+        gap: $space-3;
     }
 
     @include respond(lg) {
-        max-width: 380px;
+        max-width: 420px;
         margin: -300px auto $space-12;
         padding: $space-6 $space-8;
-
         background:
             radial-gradient(circle at 15% 20%, #c7d2fe 0%, transparent 40%),
             radial-gradient(circle at 85% 70%, #a5f3fc 0%, transparent 45%),
             radial-gradient(circle at 50% 90%, #dbeafe 0%, transparent 50%),
             rgba(255, 255, 255, 0.6);
-
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
-
         border: 2px solid rgba(239, 68, 68, 0.25);
     }
 
@@ -233,95 +221,199 @@ main {
         font-style: italic;
     }
 }
-.rooms-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: $space-3;
-  margin-top: $space-2;
-  margin-bottom: $space-4;
 
-  @include respond(md) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.selected-room-box {
+    padding: $space-3;
+    border-radius: $radius-lg;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+
+    strong {
+        font-size: 1rem;
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: rgba(15, 23, 42, 0.75);
+    }
+}
+
+.selected-room-box__label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+}
+
+.selected-room-box__actions {
+    margin-top: $space-2;
+}
+
+.rooms-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-3;
+    margin-top: $space-2;
+    margin-bottom: $space-2;
+
+    @include respond(md) {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .room-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    width: 100%;
+    padding: $space-4;
+    border-radius: $radius-lg;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.95);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
 
-  width: 100%;
-  padding: $space-4;
-  border-radius: $radius-lg;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.95);
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        border-color: rgba(239, 68, 68, 0.35);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
 
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
 
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    border-color: rgba(239, 68, 68, 0.35);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  }
+    &--active {
+        border: 2px solid rgba(239, 68, 68, 0.55);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
 
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
+    &__title {
+        font-size: 1rem;
+        font-weight: 700;
+    }
 
-  &--active {
-    border: 2px solid rgba(239, 68, 68, 0.55);
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
-  }
+    &__meta {
+        font-size: 0.9rem;
+        color: #555;
+    }
 
-  &__title {
-    font-size: 1rem;
-    font-weight: 700;
-  }
+    &__status {
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
 
-  &__meta {
-    font-size: 0.9rem;
-    color: #555;
-  }
+    &--empty .room-card__status {
+        color: #2563eb;
+    }
 
-  &__status {
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
+    &--waiting .room-card__status {
+        color: #d97706;
+    }
 
-  &--empty .room-card__status {
-    color: #2563eb;
-  }
+    &--full .room-card__status {
+        color: #dc2626;
+    }
+}
 
-  &--waiting .room-card__status {
-    color: #d97706;
-  }
-
-  &--full .room-card__status {
-    color: #dc2626;
-  }
+.room-empty {
+    margin: 0;
+    padding: $space-4;
+    text-align: center;
+    opacity: 0.75;
 }
 
 .room-error {
-  color: #dc2626;
-  font-size: 0.9rem;
-  margin-top: $space-2;
+    color: #dc2626;
+    font-size: 0.9rem;
+    margin-top: $space-2;
 }
+
+.room-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $space-4;
+}
+
+.room-modal {
+    width: min(920px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background:
+        radial-gradient(circle at 15% 20%, #c7d2fe 0%, transparent 40%),
+        radial-gradient(circle at 85% 70%, #a5f3fc 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, #dbeafe 0%, transparent 50%),
+        rgba(255, 255, 255, 0.96);
+    border-radius: $radius-xl;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: $space-4;
+
+    @include respond(md) {
+        padding: $space-6;
+    }
+}
+
+.room-modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-3;
+    margin-bottom: $space-4;
+
+    h3 {
+        margin: 0 0 $space-1 0;
+    }
+
+    p {
+        margin: 0;
+        opacity: 0.75;
+    }
+}
+
+.room-modal__close {
+    border: 0;
+    background: rgba(0, 0, 0, 0.06);
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.room-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-3;
+    margin-top: $space-4;
+    flex-wrap: wrap;
+}
+
 input {
-    width: 90%;
-    padding: $space-2;
+    width: 100%;
+    padding: $space-3;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: $radius-lg;
     font-size: 1rem;
+    box-sizing: border-box;
 }
 
 footer {
     background-color: rgba(95, 24, 80, 0.486);
     color: white;
     padding: $space-4;
-    border-radius: 50px 50px 0px 0;
+    border-radius: 50px 50px 0 0;
     text-align: center;
 }

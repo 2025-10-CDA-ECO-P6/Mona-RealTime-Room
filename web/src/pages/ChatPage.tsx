@@ -58,8 +58,7 @@ function ChatPage() {
   const [role, setRole] = useState<PlayerRole | null>(null)
   const [gameState, setGameState] = useState<PublicGameState | null>(null)
   const [selectedChoice, setSelectedChoice] = useState<PlayerChoice | null>(null)
-  const [roundResult, setRoundResult] = useState<string>('')
-  const [gameResult, setGameResult] = useState<string>('')
+  const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
     if (!pseudo || !roomId) {
@@ -80,7 +79,6 @@ function ChatPage() {
     }
 
     const handleRoomJoined = (data: { roomId: string; role: PlayerRole | null }) => {
-      console.log('room joined:', data.roomId, 'role:', data.role)
       setRole(data.role)
       setRoomError(null)
     }
@@ -91,56 +89,32 @@ function ChatPage() {
 
     const handleGameStarted = (data: PublicGameState) => {
       setGameState(data)
-      setRoundResult('')
-      setGameResult('')
       setSelectedChoice(null)
+      setRoomError(null)
     }
 
     const handleRoundStarted = (data: PublicGameState) => {
       setGameState(data)
-      setRoundResult('')
       setSelectedChoice(null)
+      setRoomError(null)
     }
 
     const handleChoiceReceived = () => {
-      setGameState((prev) => {
-        if (!prev?.game?.currentRound) return prev
-        return { ...prev }
-      })
+      setGameState((prev) => (prev ? { ...prev } : prev))
     }
 
     const handleRoundResolved = (data: { winner: Winner; game: Game }) => {
       setGameState((prev) => {
         if (!prev) return prev
-        return {
-          ...prev,
-          game: data.game,
-        }
+        return { ...prev, game: data.game }
       })
-
-      if (data.winner === 'egalite') {
-        setRoundResult('Égalité sur cette manche.')
-      } else if (data.winner === role) {
-        setRoundResult('Tu as gagné cette manche.')
-      } else {
-        setRoundResult('Tu as perdu cette manche.')
-      }
     }
 
     const handleGameFinished = (data: { game: Game }) => {
       setGameState((prev) => {
         if (!prev) return prev
-        return {
-          ...prev,
-          game: data.game,
-        }
+        return { ...prev, game: data.game }
       })
-
-      if (data.game.winner === role) {
-        setGameResult('Tu as gagné la partie.')
-      } else {
-        setGameResult('Tu as perdu la partie.')
-      }
     }
 
     socket.on('connect', handleConnect)
@@ -170,14 +144,22 @@ function ChatPage() {
       socket.off('game:round_resolved', handleRoundResolved)
       socket.off('game:finished', handleGameFinished)
     }
-  }, [navigate, pseudo, roomId, role])
+  }, [navigate, pseudo, roomId])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(Date.now())
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleSend = () => {
     if (!input.trim() || !roomId) return
 
     socket.emit('room:message', {
       room: roomId,
-      message: input,
+      message: input.trim(),
       author: pseudo,
     })
 
@@ -198,7 +180,11 @@ function ChatPage() {
     })
   }
 
-  const currentRound = gameState?.game?.currentRound ?? null
+  const game = gameState?.game ?? null
+  const currentRound = game?.currentRound ?? null
+
+  const player1Name = gameState?.players.player1.author ?? 'Joueur 1'
+  const player2Name = gameState?.players.player2.author ?? 'Joueur 2'
 
   const myChoice = useMemo(() => {
     if (!currentRound || !role) return null
@@ -211,128 +197,230 @@ function ChatPage() {
   }, [currentRound, role])
 
   const canPlay =
-    !!gameState?.game &&
-    gameState.game.status === 'in_progress' &&
+    !!game &&
+    game.status === 'in_progress' &&
     !!currentRound &&
     currentRound.status === 'waiting_for_choices' &&
     myChoice === null
 
-  const player1Name = gameState?.players.player1.author ?? 'Joueur 1'
-  const player2Name = gameState?.players.player2.author ?? 'Joueur 2'
+  const roundResult = useMemo(() => {
+    if (!currentRound || currentRound.status !== 'resolved' || !currentRound.winner || !role) {
+      return ''
+    }
+
+    if (currentRound.winner === 'egalite') {
+      return 'Égalité sur cette manche.'
+    }
+
+    return currentRound.winner === role
+      ? 'Tu as gagné cette manche.'
+      : 'Tu as perdu cette manche.'
+  }, [currentRound, role])
+
+  const gameResult = useMemo(() => {
+    if (!game || game.status !== 'finished' || !game.winner || !role) return ''
+
+    return game.winner === role
+      ? 'Tu as gagné la partie.'
+      : 'Tu as perdu la partie.'
+  }, [game, role])
+
+  const roundTimeLeft = useMemo(() => {
+    if (!currentRound || currentRound.status !== 'waiting_for_choices') return null
+    return Math.max(0, Math.ceil((currentRound.deadlineAt - now) / 1000))
+  }, [currentRound, now])
+
+  const gameStatusLabel = useMemo(() => {
+    if (!game) return 'En attente'
+    if (game.status === 'finished') return 'Terminée'
+    return 'En cours'
+  }, [game])
+
+  const myPlayerName = role === 'player1' ? player1Name : role === 'player2' ? player2Name : pseudo
+  const opponentName = role === 'player1' ? player2Name : player1Name
+
+  const myScore =
+    role === 'player1'
+      ? game?.score.player1 ?? 0
+      : role === 'player2'
+        ? game?.score.player2 ?? 0
+        : 0
+
+  const opponentScore =
+    role === 'player1'
+      ? game?.score.player2 ?? 0
+      : role === 'player2'
+        ? game?.score.player1 ?? 0
+        : 0
+
+  const waitingForOpponent =
+    !gameState?.players.player1.socketId || !gameState?.players.player2.socketId
 
   return (
     <>
       <Navbar />
 
       <main className="page chat-page">
-        <header className="hero-header">
-          <h1>JEU: PIERRE — FEUILLE — CISEAUX</h1>
-          <h2>Affronte un adversaire en temps réel</h2>
-          <h3># PFC</h3>
-          <p className="chat-room-name">Room : {roomId}</p>
-          <p className="chat-room-name">Pseudo : {pseudo}</p>
-          <p className="chat-room-name">
-            Rôle : {role ? role : 'en attente'}
-          </p>
-        </header>
+        <section className="session-bar">
+          <div className="session-bar__title">
+            <h1>ShiFuMi</h1>
+            <p>Partie multijoueur en temps réel</p>
+          </div>
+
+          <div className="session-bar__meta">
+            <div className="session-chip">
+              <span className="session-chip__label">Room</span>
+              <strong>{roomId}</strong>
+            </div>
+
+            <div className="session-chip">
+              <span className="session-chip__label">Pseudo</span>
+              <strong>{pseudo}</strong>
+            </div>
+
+            <div className="session-chip">
+              <span className="session-chip__label">Rôle</span>
+              <strong>{role ?? 'en attente'}</strong>
+            </div>
+
+            <div className="session-chip">
+              <span className="session-chip__label">Partie</span>
+              <strong>{gameStatusLabel}</strong>
+            </div>
+          </div>
+        </section>
 
         <section className="chat-layout">
           <section className="panel panel--game">
-            <div className="panel__head">
+            <div className="panel__head panel__head--stack">
               <div>
                 <h4>Table de jeu</h4>
-                <p>
-                  {gameState?.game
-                    ? 'La partie est synchronisée avec le serveur.'
-                    : 'En attente de deux joueurs pour démarrer la partie.'}
-                </p>
+                <p>État synchronisé avec le serveur.</p>
+              </div>
+            </div>
+
+            <div className="game-top-info">
+              <div className="game-top-info__item">
+                <span>Manches</span>
+                <strong>{game?.roundsPlayed ?? 0}</strong>
               </div>
 
-              <button className="btn btn--ghost" type="button" disabled>
-                {gameState?.game ? 'PARTIE ACTIVE' : 'EN ATTENTE'}
-              </button>
+              <div className="game-top-info__item">
+                <span>Minimum</span>
+                <strong>{game?.minimumRounds ?? '-'}</strong>
+              </div>
+
+              <div className="game-top-info__item">
+                <span>Statut</span>
+                <strong>{game?.status ?? 'en attente'}</strong>
+              </div>
+
+              <div className="game-top-info__item">
+                <span>Manche</span>
+                <strong>{currentRound?.status ?? 'aucune'}</strong>
+              </div>
+
+              <div className="game-top-info__item">
+                <span>Temps</span>
+                <strong>
+                  {game && currentRound?.status === 'waiting_for_choices' && roundTimeLeft !== null
+                    ? `${roundTimeLeft}s`
+                    : '-'}
+                </strong>
+              </div>
+            </div>
+
+            <div className="game-status-strip">
+              {waitingForOpponent && (
+                <p className="game-status-strip__text">
+                  En attente d’un second joueur.
+                </p>
+              )}
+
+              {!waitingForOpponent && game && currentRound?.status === 'waiting_for_choices' && roundTimeLeft !== null && (
+                <div className="game-status-strip__countdown">
+                  <span>Temps restant</span>
+                  <strong>{roundTimeLeft}s</strong>
+                </div>
+              )}
+
+              {!waitingForOpponent && game && currentRound?.status === 'resolved' && (
+                <div className="game-status-strip__result">
+                  <strong>{roundResult}</strong>
+                  {gameResult && <span>{gameResult}</span>}
+                </div>
+              )}
+
+              {roomError && <p className="room-error">{roomError}</p>}
             </div>
 
             <div className="game-play">
-              <div className="game-info">
-                <p>
-                  <strong>{player1Name}</strong> : {gameState?.game?.score.player1 ?? 0}
-                </p>
-                <p>
-                  <strong>{player2Name}</strong> : {gameState?.game?.score.player2 ?? 0}
-                </p>
-                <p>
-                  Manches jouées : {gameState?.game?.roundsPlayed ?? 0}
-                </p>
-                <p>
-                  Minimum : {gameState?.game?.minimumRounds ?? '-'}
-                </p>
+              <div className="player-panel player-panel--me">
+                <div className="player-info">
+                  <div>
+                    <strong>{myPlayerName || 'Toi'}</strong>
+                    <p>Ton espace</p>
+                  </div>
+                  <span className="score">{myScore}</span>
+                </div>
+
+                <div className="player-img player-img--choice">
+                  <span className="player-img__label">Choix actuel</span>
+                  <strong>{myChoice ?? 'Pas encore joué'}</strong>
+                </div>
+
+                <div className="choice-grid">
+                  <button
+                    className={`choice-tile ${selectedChoice === 'pierre' ? 'choice-tile--active' : ''}`}
+                    type="button"
+                    onClick={() => handlePlayChoice('pierre')}
+                    disabled={!canPlay}
+                  >
+                    <span className="choice-tile__title">Pierre</span>
+                    <span className="choice-tile__desc">Solide et directe</span>
+                  </button>
+
+                  <button
+                    className={`choice-tile ${selectedChoice === 'feuille' ? 'choice-tile--active' : ''}`}
+                    type="button"
+                    onClick={() => handlePlayChoice('feuille')}
+                    disabled={!canPlay}
+                  >
+                    <span className="choice-tile__title">Feuille</span>
+                    <span className="choice-tile__desc">Couvre la pierre</span>
+                  </button>
+
+                  <button
+                    className={`choice-tile ${selectedChoice === 'ciseaux' ? 'choice-tile--active' : ''}`}
+                    type="button"
+                    onClick={() => handlePlayChoice('ciseaux')}
+                    disabled={!canPlay}
+                  >
+                    <span className="choice-tile__title">Ciseaux</span>
+                    <span className="choice-tile__desc">Tranche la feuille</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="choices">
-                <button
-                  className={`btn btn--choice ${selectedChoice === 'pierre' ? 'is-active' : ''}`}
-                  type="button"
-                  onClick={() => handlePlayChoice('pierre')}
-                  disabled={!canPlay}
-                >
-                  Pierre
-                </button>
+              <div className="opponent-panel">
+                <div className="opponent-info">
+                  <div>
+                    <strong>{opponentName || 'Adversaire'}</strong>
+                    <p>Adversaire</p>
+                  </div>
+                  <span className="opponent-choice">Score : {opponentScore}</span>
+                </div>
 
-                <button
-                  className={`btn btn--choice ${selectedChoice === 'feuille' ? 'is-active' : ''}`}
-                  type="button"
-                  onClick={() => handlePlayChoice('feuille')}
-                  disabled={!canPlay}
-                >
-                  Feuille
-                </button>
-
-                <button
-                  className={`btn btn--choice ${selectedChoice === 'ciseaux' ? 'is-active' : ''}`}
-                  type="button"
-                  onClick={() => handlePlayChoice('ciseaux')}
-                  disabled={!canPlay}
-                >
-                  Ciseaux
-                </button>
-              </div>
-
-              <div className="game-placeholder">
-                {!gameState?.game && <p>En attente d’un second joueur.</p>}
-
-                {gameState?.game && currentRound && (
-                  <>
-                    <p>
-                      Statut de manche : <strong>{currentRound.status}</strong>
-                    </p>
-                    <p>
-                      Ton choix : <strong>{myChoice ?? 'pas encore joué'}</strong>
-                    </p>
-                    <p>
-                      Choix adverse :{' '}
-                      <strong>
-                        {currentRound.status === 'resolved'
-                          ? opponentChoice ?? 'aucun'
-                          : opponentChoice
-                          ? 'choix reçu'
-                          : 'en attente'}
-                      </strong>
-                    </p>
-                  </>
-                )}
-
-                {roundResult && (
-                  <p className="game-result">
-                    <strong>{roundResult}</strong>
-                  </p>
-                )}
-
-                {gameResult && (
-                  <p className="game-result-final">
-                    <strong>{gameResult}</strong>
-                  </p>
-                )}
+                <div className="opponent-img opponent-img--choice">
+                  <span className="player-img__label">Choix adverse</span>
+                  <strong>
+                    {currentRound?.status === 'resolved'
+                      ? opponentChoice ?? 'Aucun choix'
+                      : opponentChoice
+                        ? 'Choix reçu'
+                        : 'En attente'}
+                  </strong>
+                </div>
               </div>
             </div>
           </section>
@@ -341,18 +429,16 @@ function ChatPage() {
             <div className="panel__head">
               <div>
                 <h4>Historique & Chat</h4>
-                <p>Suivi des manches et discussion avec les joueurs.</p>
+                <p>Discussion et messages système.</p>
               </div>
             </div>
 
-            {roomError && <p className="room-error">{roomError}</p>}
-
             <div className="chat-box">
-              {messages.length === 0 && <p className="muted">Aucun message</p>}
+              {messages.length === 0 && <p>Aucun message</p>}
 
               {messages.map((m, i) => (
                 <div
-                  key={i}
+                  key={`${m.time}-${i}`}
                   className={`chat-message ${m.author === 'Système' ? 'chat-message--system' : ''}`}
                 >
                   <div className="chat-message__time">
@@ -408,4 +494,4 @@ function ChatPage() {
   )
 }
 
-export default ChatPage
+export default ChatPage;

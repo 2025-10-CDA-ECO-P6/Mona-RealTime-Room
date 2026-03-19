@@ -15,6 +15,7 @@ type RoomStatus = {
 
 function HomePage() {
   const navigate = useNavigate()
+
   const [pseudo, setPseudo] = useState(() => {
     return localStorage.getItem('pseudo') ?? ''
   })
@@ -24,21 +25,21 @@ function HomePage() {
   })
   const [rooms, setRooms] = useState<RoomStatus[]>([])
   const [roomError, setRoomError] = useState<string | null>(null)
+  const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
 
-  // SOCKET
   useEffect(() => {
     const handleRoomsList = (roomsList: RoomStatus[]) => {
-      console.log('ROOMS REÇUES FRONT:', roomsList)
       setRooms(roomsList)
     }
+
     socket.on('rooms:list', handleRoomsList)
     socket.emit('rooms:list')
+
     return () => {
       socket.off('rooms:list', handleRoomsList)
     }
   }, [])
 
-  // AUTO SELECT ROOM
   useEffect(() => {
     if (pseudoValidated && !roomId && rooms.length > 0) {
       const firstAvailableRoom = rooms.find((room) => room.status !== 'full')
@@ -48,41 +49,49 @@ function HomePage() {
     }
   }, [pseudoValidated, rooms, roomId])
 
-  // VALIDATION PSEUDO
   const handleValidatePseudo = () => {
     const clean = pseudo.trim()
+
     if (!clean) {
       setRoomError('Tu dois entrer un pseudo.')
       return
     }
+
     setPseudo(clean)
     setPseudoValidated(true)
     setRoomError(null)
+    setIsRoomModalOpen(true)
   }
 
-  // CONTINUE
   const handleContinue = () => {
     if (!pseudoValidated) {
       setRoomError('Valide ton pseudo avant de continuer.')
       return
     }
+
     if (!roomId) {
       setRoomError('Tu dois choisir une room.')
       return
     }
+
     const selectedRoom = rooms.find((room) => room.roomId === roomId)
+
     if (!selectedRoom) {
       setRoomError('Cette room est introuvable.')
       return
     }
+
     if (selectedRoom.status === 'full') {
       setRoomError('Cette room est déjà pleine.')
       return
     }
+
     localStorage.setItem('pseudo', pseudo)
     localStorage.setItem('roomId', roomId)
     navigate('/chat')
   }
+
+  const selectedRoomData = rooms.find((room) => room.roomId === roomId) ?? null
 
   return (
     <>
@@ -90,7 +99,7 @@ function HomePage() {
 
       <main className="page">
         <header className="hero-header">
-          <h1>JEU: PIERRE — FEUILLE — CISEAUX</h1>
+          <h1>ShiFuMi</h1>
           <h2>Prêt·e à défier d'autres joueurs en temps réel ?</h2>
           <h3>Vise la victoire — #PFC</h3>
         </header>
@@ -99,13 +108,24 @@ function HomePage() {
           <div className="card__info">
             <h4>Accès jeu</h4>
             <h5>Rejoignez une partie</h5>
-            <p>Choisis un pseudo puis sélectionne une room existante pour entrer dans une partie.</p>
+            <p>Choisis un pseudo puis rejoins une room disponible pour entrer dans une partie.</p>
 
             <div className="buttons_infos">
               <ButtonInfo>JOUER SANS COMPTE</ButtonInfo>
               <ButtonInfo>TEMPS RÉEL</ButtonInfo>
               <ButtonInfo>MULTIJOUEUR</ButtonInfo>
-              <ButtonInfo>CLASSEMENTS</ButtonInfo>
+              <ButtonInfo>PARTIES RAPIDES</ButtonInfo>
+            </div>
+
+            <div className="rules">
+              <h5>Comment ça marche</h5>
+              <ol>
+                <li>Choisis ton pseudo</li>
+                <li>Sélectionne une room</li>
+                <li>Attends ton adversaire</li>
+                <li>Joue en temps réel</li>
+              </ol>
+              <p>La partie démarre automatiquement dès que deux joueurs sont présents.</p>
             </div>
           </div>
 
@@ -119,7 +139,7 @@ function HomePage() {
         </section>
 
         <section className="card_pseudo">
-          <h3>ENTREE</h3>
+          <h3>ENTRÉE</h3>
           <h2 className="card_pseudo__title">Choisis ton pseudo</h2>
 
           <input
@@ -138,8 +158,58 @@ function HomePage() {
           </Button>
 
           {pseudoValidated && (
-            <>
-              <h2 className="card_pseudo__title">Choisis une room</h2>
+            <div className="selected-room-box">
+              <span className="selected-room-box__label">Room sélectionnée</span>
+              <strong>{roomId || 'Aucune room sélectionnée'}</strong>
+
+              {selectedRoomData && (
+                <p>
+                  {selectedRoomData.count}/2 •{' '}
+                  {selectedRoomData.status === 'empty' && 'Disponible'}
+                  {selectedRoomData.status === 'waiting' && 'En attente'}
+                  {selectedRoomData.status === 'full' && 'Complète'}
+                </p>
+              )}
+
+              <div className="selected-room-box__actions">
+                <Button onClick={() => setIsRoomModalOpen(true)}>
+                  Choisir une room
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {roomError && <p className="room-error">{roomError}</p>}
+
+          <Button onClick={handleContinue}>
+            Continuer
+          </Button>
+        </section>
+
+        {isRoomModalOpen && (
+          <div
+            className="room-modal-overlay"
+            onClick={() => setIsRoomModalOpen(false)}
+          >
+            <div
+              className="room-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="room-modal__head">
+                <div>
+                  <h3>Choisis une room</h3>
+                  <p>Les rooms complètes ne sont pas sélectionnables.</p>
+                </div>
+
+                <button
+                  type="button"
+                  className="room-modal__close"
+                  onClick={() => setIsRoomModalOpen(false)}
+                  aria-label="Fermer"
+                >
+                  ×
+                </button>
+              </div>
 
               <div className="rooms-grid">
                 {rooms.length === 0 && (
@@ -155,10 +225,11 @@ function HomePage() {
                       setRoomError(null)
                     }}
                     disabled={room.status === 'full'}
+                    type="button"
                   >
-                    <span>{room.roomId}</span>
-                    <span>{room.count}/2</span>
-                    <span>
+                    <span className="room-card__title">{room.roomId}</span>
+                    <span className="room-card__meta">{room.count}/2 joueurs</span>
+                    <span className="room-card__status">
                       {room.status === 'empty' && 'Disponible'}
                       {room.status === 'waiting' && 'En attente'}
                       {room.status === 'full' && 'Complète'}
@@ -166,15 +237,18 @@ function HomePage() {
                   </button>
                 ))}
               </div>
-            </>
-          )}
 
-          {roomError && <p className="room-error">{roomError}</p>}
-
-          <Button onClick={handleContinue}>
-            Continuer
-          </Button>
-        </section>
+              <div className="room-modal__footer">
+                <Button onClick={() => setIsRoomModalOpen(false)}>
+                  Fermer
+                </Button>
+                <Button onClick={() => setIsRoomModalOpen(false)}>
+                  Confirmer la room
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </>
   )
