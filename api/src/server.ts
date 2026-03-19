@@ -1,20 +1,20 @@
-import express from "express";
-import http from "http";
 import cors from "cors";
-import { Server, Socket } from "socket.io";
-import helmet from "helmet";
+import express from "express";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import http from "http";
+import { Server, Socket } from "socket.io";
 
 import {
+  canResolveRound,
   createGame,
+  isGameFinished,
+  resolveRound,
   startRound,
   submitChoice,
-  canResolveRound,
-  resolveRound,
-  isGameFinished,
   type Game,
   type PlayerChoice,
-} from "./game/game.ts";
+} from "./game/game";
 
 const app = express();
 
