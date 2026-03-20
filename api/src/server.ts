@@ -14,7 +14,7 @@ import {
   submitChoice,
   type Game,
   type PlayerChoice,
-} from "./game/game";
+} from "./game/game.ts";
 
 const app = express();
 
